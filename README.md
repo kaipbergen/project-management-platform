@@ -1,6 +1,6 @@
 # Project Management Dashboard
 
-A production-grade project management API built for EPAM Lab's Python Engineering Program.
+A production-grade project management API 
 
 ## Stack
 - **FastAPI** — async REST API
