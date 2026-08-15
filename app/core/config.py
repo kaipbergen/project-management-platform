@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     secret_key: str = "change-me-in-production-use-32-chars-minimum"
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 15  # short-lived
+    access_token_expire_minutes: int = 60  # 1 hour, per spec
     refresh_token_expire_days: int = 7  # long-lived
 
     # Database
