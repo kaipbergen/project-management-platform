@@ -57,7 +57,7 @@ jobs:
 
     env:
       APP_ENV: testing
-      DATABASE_URL: sqlite+aiosqlite:///:memory:
+      DATABASE_URL: "sqlite+aiosqlite:///:memory:"
       SECRET_KEY: test-secret-key-32-chars-minimum!!
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
