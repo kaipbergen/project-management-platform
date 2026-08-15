@@ -18,9 +18,6 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # ── project_role enum ──────────────────────────────────────────────────
-    op.execute("CREATE TYPE project_role AS ENUM ('owner', 'participant')")
-
     # ── users ──────────────────────────────────────────────────────────────
     op.create_table(
         "users",

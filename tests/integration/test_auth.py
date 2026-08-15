@@ -75,7 +75,7 @@ class TestLogin:
         data = resp.json()
         assert "access_token" in data
         assert data["token_type"] == "bearer"
-        assert data["access_expires_in"] == 15 * 60
+        assert data["access_expires_in"] == 60 * 60
         assert "refresh_token" in data
 
     async def test_login_wrong_password(

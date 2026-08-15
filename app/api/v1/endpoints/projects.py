@@ -17,8 +17,13 @@ from app.schemas.schemas import (
     ProjectPage,
     ProjectSearchParams,
     ProjectUpdate,
+    ShareLinkResponse,
 )
-from app.services.notification_service import notify_project_deleted, notify_user_invited
+from app.services.notification_service import (
+    notify_project_deleted,
+    notify_share_link,
+    notify_user_invited,
+)
 from app.services.project_service import (
     create_project,
     delete_project,
@@ -28,6 +33,7 @@ from app.services.project_service import (
     list_user_projects,
     update_project,
 )
+from app.services.share_service import create_share_token
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -153,3 +159,28 @@ async def invite_user_endpoint(
         inviter_login=current_user.login,
     )
     return MessageResponse(message=f"User '{payload.user_login}' successfully invited")
+
+
+@router.get(
+    "/{project_id}/share",
+    response_model=ShareLinkResponse,
+    summary="Generate a hashed join link and email it (owner only, optional spec feature)",
+)
+async def share_project_endpoint(
+    project_id: uuid.UUID,
+    background_tasks: BackgroundTasks,
+    with_email: str = Query(..., alias="with", min_length=3, max_length=256),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> ShareLinkResponse:
+    raw_token, expires_at, project = await create_share_token(
+        project_id, with_email, current_user, db
+    )
+    join_url = f"/api/v1/join?token={raw_token}"
+    background_tasks.add_task(
+        notify_share_link,
+        email=with_email,
+        project_name=project.name,
+        join_url=join_url,
+    )
+    return ShareLinkResponse(join_url=join_url, expires_at=expires_at)

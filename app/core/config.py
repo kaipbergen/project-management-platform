@@ -8,6 +8,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+        extra="ignore",  # .env also carries POSTGRES_* vars consumed only by docker-compose
     )
 
     # App
@@ -23,8 +24,9 @@ class Settings(BaseSettings):
     # AWS
     aws_access_key_id: str = "test"
     aws_secret_access_key: str = "test"
+    aws_session_token: str | None = None  # required for temporary/STS credentials
     aws_region: str = "us-east-1"
-    s3_bucket_name: str = "epam-project-mgmt-docs"
+    s3_bucket_name: str = "project-mgmt-docs-f4a8baae"
 
     # Lambda
     lambda_function_name: str = "project-file-size-calculator"

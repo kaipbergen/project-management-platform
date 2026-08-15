@@ -29,6 +29,13 @@ docker compose up --build
 # Docs at http://localhost:8000/docs
 ```
 
+By default `docker compose up` targets real AWS (S3 bucket + Lambda) using the
+credentials in `.env`. For local dev against LocalStack instead, layer the
+overlay file:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.localstack.yml up --build
+```
+
 ## API Endpoints
 | Method | Path | Description |
 |--------|------|-------------|
@@ -45,3 +52,12 @@ docker compose up --build
 | PUT | `/api/v1/documents/{id}` | Update document |
 | DELETE | `/api/v1/documents/{id}` | Delete document |
 | POST | `/api/v1/projects/{id}/invite` | Invite user (owner only) |
+| GET | `/api/v1/projects/{id}/share?with=<email>` | Generate hashed join link, email it (owner only, optional) |
+| GET | `/api/v1/join?token=<token>` | Redeem a share join link → participant access |
+| GET | `/api/v1/projects/{id}/storage` | Storage usage vs. project limit |
+
+## Database design
+
+See [docs/db-design.md](docs/db-design.md) for the normalization rationale, a documented
+denormalized read-model example (`sql/schema.sql`), and the raw-SQL schema (no ORM) alongside
+the SQLAlchemy/Alembic one.

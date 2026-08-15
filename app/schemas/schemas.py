@@ -123,6 +123,17 @@ class InviteRequest(BaseModel):
     user_login: str = Field(min_length=1, max_length=64)
 
 
+class ShareLinkResponse(BaseModel):
+    join_url: str
+    expires_at: datetime
+
+
+class JoinResponse(BaseModel):
+    project_id: uuid.UUID
+    role: str
+    message: str
+
+
 # ── Generic responses ─────────────────────────────────────────────────────────
 
 class MessageResponse(BaseModel):

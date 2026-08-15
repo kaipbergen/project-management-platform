@@ -1,0 +1,38 @@
+version: "3.9"
+
+# LocalStack dev overlay. Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.localstack.yml up --build
+# (base docker-compose.yml alone now targets real AWS via .env)
+
+services:
+  localstack:
+    image: localstack/localstack:3
+    container_name: project_mgmt_localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: s3,lambda
+      DEFAULT_REGION: us-east-1
+      LAMBDA_EXECUTOR: docker
+      DOCKER_HOST: unix:///var/run/docker.sock
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - localstack_data:/var/lib/localstack
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+      AWS_ENDPOINT_URL: http://localstack:4566
+    depends_on:
+      localstack:
+        condition: service_healthy
+
+volumes:
+  localstack_data:

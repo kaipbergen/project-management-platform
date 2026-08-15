@@ -70,6 +70,19 @@ async def notify_user_invited(
     )
 
 
+async def notify_share_link(email: str, project_name: str, join_url: str) -> None:
+    """Send a project join link to an (unregistered) email address."""
+    subject = f"You've been invited to join '{project_name}'"
+    body = (
+        f"Hi,\n\n"
+        f"You've been invited to collaborate on '{project_name}'.\n"
+        f"Open this link to join: {join_url}\n\n"
+        f"— Project Management Dashboard"
+    )
+    await _send_via_smtp(email, subject, body)
+    logger.info("Share link sent", extra={"email": email, "project": project_name})
+
+
 async def notify_project_deleted(
     owner_login: str,
     project_name: str,

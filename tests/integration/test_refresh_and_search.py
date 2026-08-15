@@ -21,7 +21,7 @@ class TestRefreshToken:
         assert "access_token" in data
         assert "refresh_token" in data
         assert data["token_type"] == "bearer"
-        assert data["access_expires_in"] == 15 * 60
+        assert data["access_expires_in"] == 60 * 60
         assert data["refresh_expires_in"] == 7 * 86400
 
     async def test_refresh_returns_new_pair(self, client: AsyncClient) -> None:

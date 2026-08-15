@@ -176,3 +176,31 @@ class RefreshToken(Base):
 
     def __repr__(self) -> str:
         return f"<RefreshToken user={self.user_id} revoked={self.revoked}>"
+
+
+# ── ProjectShareToken ───────────────────────────────────────────────────────────
+
+class ProjectShareToken(Base):
+    """One-time-generated, hashed join token for GET /projects/{id}/share?with=<email>."""
+
+    __tablename__ = "project_share_tokens"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE"),
+        nullable=False, index=True
+    )
+    invited_email: Mapped[str] = mapped_column(String(256), nullable=False)
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used: Mapped[bool] = mapped_column(default=False, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, nullable=False
+    )
+
+    project: Mapped["Project"] = relationship("Project")
+
+    def __repr__(self) -> str:
+        return f"<ProjectShareToken project={self.project_id} email={self.invited_email}>"
