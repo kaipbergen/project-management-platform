@@ -1,5 +1,6 @@
 import math
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -55,10 +56,12 @@ async def create_project_endpoint(
 @router.get(
     "",
     response_model=ProjectPage,
-    summary="List / search projects (paginated). Use ?search=term to filter by name or description.",
+    summary="List / search projects (paginated). Use ?search=term to filter by name/description.",
 )
 async def list_projects_endpoint(
-    search: str | None = Query(default=None, max_length=128, description="Filter by name or description"),
+    search: str | None = Query(
+        default=None, max_length=128, description="Filter by name or description"
+    ),
     page: int = Query(default=1, ge=1),
     size: int = Query(default=20, ge=1, le=100),
     current_user: User = Depends(get_current_user),
@@ -128,14 +131,14 @@ async def delete_project_endpoint(
 
 @router.get(
     "/{project_id}/members",
-    response_model=list[dict],
+    response_model=list[dict[str, Any]],
     summary="List all members of a project",
 )
 async def list_members_endpoint(
     project_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> list:
+) -> list[dict[str, Any]]:
     return await list_project_members(project_id, current_user, db)
 
 

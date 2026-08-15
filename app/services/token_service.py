@@ -74,9 +74,7 @@ async def rotate_token_pair(raw_refresh: str, db: AsyncSession) -> TokenPair:
     token_hash = _hash_token(raw_refresh)
     now = datetime.now(timezone.utc)
 
-    result = await db.execute(
-        select(RefreshToken).where(RefreshToken.token_hash == token_hash)
-    )
+    result = await db.execute(select(RefreshToken).where(RefreshToken.token_hash == token_hash))
     rt = result.scalar_one_or_none()
 
     if rt is None:
@@ -104,9 +102,7 @@ async def rotate_token_pair(raw_refresh: str, db: AsyncSession) -> TokenPair:
 async def revoke_token(raw_refresh: str, db: AsyncSession) -> None:
     """Revoke a specific refresh token (logout)."""
     token_hash = _hash_token(raw_refresh)
-    result = await db.execute(
-        select(RefreshToken).where(RefreshToken.token_hash == token_hash)
-    )
+    result = await db.execute(select(RefreshToken).where(RefreshToken.token_hash == token_hash))
     rt = result.scalar_one_or_none()
     if rt and not rt.revoked:
         rt.revoked = True

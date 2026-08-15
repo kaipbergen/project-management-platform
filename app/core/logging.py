@@ -8,13 +8,14 @@ import logging
 import sys
 import traceback
 from datetime import datetime, timezone
+from typing import Any
 
 
 class JsonFormatter(logging.Formatter):
     """Formats log records as single-line JSON."""
 
     def format(self, record: logging.LogRecord) -> str:
-        payload: dict = {
+        payload: dict[str, Any] = {
             "ts": datetime.now(timezone.utc).isoformat(),
             "level": record.levelname,
             "logger": record.name,
@@ -28,11 +29,29 @@ class JsonFormatter(logging.Formatter):
         # Structured extra fields (e.g. logger.info("...", extra={"user_id": ...}))
         for key, val in record.__dict__.items():
             if key not in {
-                "name", "msg", "args", "levelname", "levelno", "pathname",
-                "filename", "module", "exc_info", "exc_text", "stack_info",
-                "lineno", "funcName", "created", "msecs", "relativeCreated",
-                "thread", "threadName", "processName", "process", "message",
-                "taskName", "request_id",
+                "name",
+                "msg",
+                "args",
+                "levelname",
+                "levelno",
+                "pathname",
+                "filename",
+                "module",
+                "exc_info",
+                "exc_text",
+                "stack_info",
+                "lineno",
+                "funcName",
+                "created",
+                "msecs",
+                "relativeCreated",
+                "thread",
+                "threadName",
+                "processName",
+                "process",
+                "message",
+                "taskName",
+                "request_id",
             }:
                 payload[key] = val
 

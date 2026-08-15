@@ -15,12 +15,12 @@ def _load_lambda_module():
     sys.modules.setdefault("psycopg2", psycopg2_mock)
 
     import importlib
-    import os
 
     os.environ.setdefault("DATABASE_URL", "postgresql://test:test@localhost/test")
     os.environ.setdefault("S3_BUCKET_NAME", "test-bucket")
 
     import importlib.util
+
     spec = importlib.util.spec_from_file_location(
         "file_size_calculator",
         os.path.join(os.path.dirname(__file__), "../../lambda/file_size_calculator.py"),
@@ -59,11 +59,7 @@ class TestHandlerWithMocks:
         self.lm = _load_lambda_module()
 
     def test_handler_skips_non_project_keys(self) -> None:
-        event = {
-            "Records": [
-                {"s3": {"object": {"key": "uploads/random-file.pdf"}}}
-            ]
-        }
+        event = {"Records": [{"s3": {"object": {"key": "uploads/random-file.pdf"}}}]}
         with patch.object(self.lm, "_calculate_project_size") as mock_calc:
             result = self.lm.handler(event, None)
             mock_calc.assert_not_called()

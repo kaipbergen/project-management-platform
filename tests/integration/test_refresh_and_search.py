@@ -1,16 +1,19 @@
 """Tests for refresh token rotation and project search."""
 
-import pytest
 from httpx import AsyncClient
 
-
 # ── Refresh token flow ────────────────────────────────────────────────────────
+
 
 class TestRefreshToken:
     async def test_login_returns_token_pair(self, client: AsyncClient) -> None:
         await client.post(
             "/api/v1/auth/register",
-            json={"login": "rt_user1", "password": "Password123!", "repeat_password": "Password123!"},
+            json={
+                "login": "rt_user1",
+                "password": "Password123!",
+                "repeat_password": "Password123!",
+            },
         )
         resp = await client.post(
             "/api/v1/auth/login",
@@ -27,7 +30,11 @@ class TestRefreshToken:
     async def test_refresh_returns_new_pair(self, client: AsyncClient) -> None:
         await client.post(
             "/api/v1/auth/register",
-            json={"login": "rt_user2", "password": "Password123!", "repeat_password": "Password123!"},
+            json={
+                "login": "rt_user2",
+                "password": "Password123!",
+                "repeat_password": "Password123!",
+            },
         )
         login = await client.post(
             "/api/v1/auth/login",
@@ -48,12 +55,14 @@ class TestRefreshToken:
         assert new_data["access_token"] != old_access
         assert new_data["refresh_token"] != old_refresh
 
-    async def test_old_refresh_token_invalid_after_rotation(
-        self, client: AsyncClient
-    ) -> None:
+    async def test_old_refresh_token_invalid_after_rotation(self, client: AsyncClient) -> None:
         await client.post(
             "/api/v1/auth/register",
-            json={"login": "rt_user3", "password": "Password123!", "repeat_password": "Password123!"},
+            json={
+                "login": "rt_user3",
+                "password": "Password123!",
+                "repeat_password": "Password123!",
+            },
         )
         login = await client.post(
             "/api/v1/auth/login",
@@ -71,13 +80,15 @@ class TestRefreshToken:
         )
         assert resp.status_code == 401
 
-    async def test_reuse_detection_revokes_all_sessions(
-        self, client: AsyncClient
-    ) -> None:
+    async def test_reuse_detection_revokes_all_sessions(self, client: AsyncClient) -> None:
         """Using a rotated token should revoke ALL sessions for security."""
         await client.post(
             "/api/v1/auth/register",
-            json={"login": "rt_user4", "password": "Password123!", "repeat_password": "Password123!"},
+            json={
+                "login": "rt_user4",
+                "password": "Password123!",
+                "repeat_password": "Password123!",
+            },
         )
         login = await client.post(
             "/api/v1/auth/login",
@@ -107,7 +118,11 @@ class TestRefreshToken:
     async def test_logout_revokes_refresh_token(self, client: AsyncClient) -> None:
         await client.post(
             "/api/v1/auth/register",
-            json={"login": "rt_logout", "password": "Password123!", "repeat_password": "Password123!"},
+            json={
+                "login": "rt_logout",
+                "password": "Password123!",
+                "repeat_password": "Password123!",
+            },
         )
         login = await client.post(
             "/api/v1/auth/login",
@@ -122,12 +137,14 @@ class TestRefreshToken:
         resp = await client.post("/api/v1/auth/refresh", json={"refresh_token": refresh})
         assert resp.status_code == 401
 
-    async def test_new_access_token_authorizes_requests(
-        self, client: AsyncClient
-    ) -> None:
+    async def test_new_access_token_authorizes_requests(self, client: AsyncClient) -> None:
         await client.post(
             "/api/v1/auth/register",
-            json={"login": "rt_auth_check", "password": "Password123!", "repeat_password": "Password123!"},
+            json={
+                "login": "rt_auth_check",
+                "password": "Password123!",
+                "repeat_password": "Password123!",
+            },
         )
         login = await client.post(
             "/api/v1/auth/login",
@@ -148,10 +165,9 @@ class TestRefreshToken:
 
 # ── Search ────────────────────────────────────────────────────────────────────
 
+
 class TestProjectSearch:
-    async def test_search_by_name(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_search_by_name(self, client: AsyncClient, auth_headers: dict) -> None:
         await client.post(
             "/api/v1/projects",
             json={"name": "Alpha Analytics", "description": "data pipeline"},
@@ -163,41 +179,31 @@ class TestProjectSearch:
             headers=auth_headers,
         )
 
-        resp = await client.get(
-            "/api/v1/projects?search=Alpha", headers=auth_headers
-        )
+        resp = await client.get("/api/v1/projects?search=Alpha", headers=auth_headers)
         assert resp.status_code == 200
         items = resp.json()["items"]
         assert all("Alpha" in p["name"] for p in items)
 
-    async def test_search_by_description(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_search_by_description(self, client: AsyncClient, auth_headers: dict) -> None:
         await client.post(
             "/api/v1/projects",
             json={"name": "Gamma Project", "description": "machine learning pipeline"},
             headers=auth_headers,
         )
 
-        resp = await client.get(
-            "/api/v1/projects?search=machine+learning", headers=auth_headers
-        )
+        resp = await client.get("/api/v1/projects?search=machine+learning", headers=auth_headers)
         assert resp.status_code == 200
         names = [p["name"] for p in resp.json()["items"]]
         assert "Gamma Project" in names
 
-    async def test_search_case_insensitive(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_search_case_insensitive(self, client: AsyncClient, auth_headers: dict) -> None:
         await client.post(
             "/api/v1/projects",
             json={"name": "Delta Dashboard"},
             headers=auth_headers,
         )
 
-        resp = await client.get(
-            "/api/v1/projects?search=delta", headers=auth_headers
-        )
+        resp = await client.get("/api/v1/projects?search=delta", headers=auth_headers)
         assert resp.status_code == 200
         names = [p["name"] for p in resp.json()["items"]]
         assert "Delta Dashboard" in names
@@ -205,9 +211,7 @@ class TestProjectSearch:
     async def test_search_no_match_returns_empty(
         self, client: AsyncClient, auth_headers: dict
     ) -> None:
-        resp = await client.get(
-            "/api/v1/projects?search=xyznonexistent999", headers=auth_headers
-        )
+        resp = await client.get("/api/v1/projects?search=xyznonexistent999", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert data["items"] == []

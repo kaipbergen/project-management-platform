@@ -2,14 +2,11 @@
 
 import uuid
 
-import pytest
 from httpx import AsyncClient
 
 
 class TestCreateProject:
-    async def test_create_project_success(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_create_project_success(self, client: AsyncClient, auth_headers: dict) -> None:
         resp = await client.post(
             "/api/v1/projects",
             json={"name": "My Project", "description": "Test desc"},
@@ -23,24 +20,16 @@ class TestCreateProject:
         assert data["total_size_bytes"] == 0
 
     async def test_create_project_no_auth(self, client: AsyncClient) -> None:
-        resp = await client.post(
-            "/api/v1/projects", json={"name": "Unauth Project"}
-        )
+        resp = await client.post("/api/v1/projects", json={"name": "Unauth Project"})
         assert resp.status_code == 401
 
-    async def test_create_project_empty_name(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
-        resp = await client.post(
-            "/api/v1/projects", json={"name": ""}, headers=auth_headers
-        )
+    async def test_create_project_empty_name(self, client: AsyncClient, auth_headers: dict) -> None:
+        resp = await client.post("/api/v1/projects", json={"name": ""}, headers=auth_headers)
         assert resp.status_code == 422
 
 
 class TestListProjects:
-    async def test_list_projects_empty(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_list_projects_empty(self, client: AsyncClient, auth_headers: dict) -> None:
         resp = await client.get("/api/v1/projects", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
@@ -62,9 +51,7 @@ class TestListProjects:
 
 
 class TestGetProjectInfo:
-    async def test_get_project_info(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_get_project_info(self, client: AsyncClient, auth_headers: dict) -> None:
         create_resp = await client.post(
             "/api/v1/projects",
             json={"name": "Info Project"},
@@ -72,25 +59,19 @@ class TestGetProjectInfo:
         )
         project_id = create_resp.json()["id"]
 
-        resp = await client.get(
-            f"/api/v1/projects/{project_id}/info", headers=auth_headers
-        )
+        resp = await client.get(f"/api/v1/projects/{project_id}/info", headers=auth_headers)
         assert resp.status_code == 200
         assert resp.json()["id"] == project_id
 
-    async def test_get_nonexistent_project(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
-        resp = await client.get(
-            f"/api/v1/projects/{uuid.uuid4()}/info", headers=auth_headers
-        )
+    async def test_get_nonexistent_project(self, client: AsyncClient, auth_headers: dict) -> None:
+        resp = await client.get(f"/api/v1/projects/{uuid.uuid4()}/info", headers=auth_headers)
         assert resp.status_code == 404
 
     async def test_no_access_to_others_project(
         self, client: AsyncClient, auth_headers: dict
     ) -> None:
         # Create second user
-        second = await client.post(
+        await client.post(
             "/api/v1/auth/register",
             json={
                 "login": "second_user_info",
@@ -113,16 +94,12 @@ class TestGetProjectInfo:
         project_id = create_resp.json()["id"]
 
         # Second user tries to access it
-        resp = await client.get(
-            f"/api/v1/projects/{project_id}/info", headers=second_headers
-        )
+        resp = await client.get(f"/api/v1/projects/{project_id}/info", headers=second_headers)
         assert resp.status_code == 403
 
 
 class TestUpdateProject:
-    async def test_update_project(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_update_project(self, client: AsyncClient, auth_headers: dict) -> None:
         create_resp = await client.post(
             "/api/v1/projects",
             json={"name": "Old Name"},
@@ -155,9 +132,7 @@ class TestUpdateProject:
 
 
 class TestDeleteProject:
-    async def test_delete_project_owner(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_delete_project_owner(self, client: AsyncClient, auth_headers: dict) -> None:
         create_resp = await client.post(
             "/api/v1/projects",
             json={"name": "To Delete"},
@@ -165,20 +140,14 @@ class TestDeleteProject:
         )
         project_id = create_resp.json()["id"]
 
-        resp = await client.delete(
-            f"/api/v1/projects/{project_id}", headers=auth_headers
-        )
+        resp = await client.delete(f"/api/v1/projects/{project_id}", headers=auth_headers)
         assert resp.status_code == 204
 
         # Verify gone
-        get_resp = await client.get(
-            f"/api/v1/projects/{project_id}/info", headers=auth_headers
-        )
+        get_resp = await client.get(f"/api/v1/projects/{project_id}/info", headers=auth_headers)
         assert get_resp.status_code == 404
 
-    async def test_participant_cannot_delete(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_participant_cannot_delete(self, client: AsyncClient, auth_headers: dict) -> None:
         # Owner creates project
         create_resp = await client.post(
             "/api/v1/projects", json={"name": "Owner's Project"}, headers=auth_headers
@@ -198,9 +167,7 @@ class TestDeleteProject:
             "/api/v1/auth/login",
             json={"login": "participant_del", "password": "Password123!"},
         )
-        participant_headers = {
-            "Authorization": f"Bearer {login_resp.json()['access_token']}"
-        }
+        participant_headers = {"Authorization": f"Bearer {login_resp.json()['access_token']}"}
 
         # Owner invites participant
         await client.post(
@@ -210,16 +177,12 @@ class TestDeleteProject:
         )
 
         # Participant tries to delete
-        resp = await client.delete(
-            f"/api/v1/projects/{project_id}", headers=participant_headers
-        )
+        resp = await client.delete(f"/api/v1/projects/{project_id}", headers=participant_headers)
         assert resp.status_code == 403
 
 
 class TestInviteUser:
-    async def test_invite_success(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_invite_success(self, client: AsyncClient, auth_headers: dict) -> None:
         await client.post(
             "/api/v1/auth/register",
             json={
@@ -241,9 +204,7 @@ class TestInviteUser:
         assert resp.status_code == 200
         assert "successfully invited" in resp.json()["message"]
 
-    async def test_invite_nonexistent_user(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_invite_nonexistent_user(self, client: AsyncClient, auth_headers: dict) -> None:
         create_resp = await client.post(
             "/api/v1/projects", json={"name": "Ghost Invite"}, headers=auth_headers
         )
@@ -256,9 +217,7 @@ class TestInviteUser:
         )
         assert resp.status_code == 404
 
-    async def test_double_invite_conflict(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_double_invite_conflict(self, client: AsyncClient, auth_headers: dict) -> None:
         await client.post(
             "/api/v1/auth/register",
             json={

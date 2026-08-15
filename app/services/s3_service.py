@@ -40,7 +40,7 @@ def upload_file_to_s3(
             ServerSideEncryption="AES256",
         )
     except ClientError as e:
-        raise BadRequestError(f"S3 upload failed: {e.response['Error']['Message']}")
+        raise BadRequestError(f"S3 upload failed: {e.response['Error']['Message']}") from e
 
 
 def generate_presigned_download_url(s3_key: str, expires_in: int = 3600) -> str:
@@ -54,7 +54,9 @@ def generate_presigned_download_url(s3_key: str, expires_in: int = 3600) -> str:
         )
         return url
     except ClientError as e:
-        raise NotFoundError(f"Could not generate download URL: {e.response['Error']['Message']}")
+        raise NotFoundError(
+            f"Could not generate download URL: {e.response['Error']['Message']}"
+        ) from e
 
 
 def delete_file_from_s3(s3_key: str) -> None:

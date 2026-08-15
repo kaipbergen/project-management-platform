@@ -77,9 +77,7 @@ class TestShareLink:
         assert data["role"] == "participant"
 
         # Joiner now has access to the project
-        info_resp = await client.get(
-            f"/api/v1/projects/{project_id}/info", headers=joiner_headers
-        )
+        info_resp = await client.get(f"/api/v1/projects/{project_id}/info", headers=joiner_headers)
         assert info_resp.status_code == 200
 
     async def test_join_with_invalid_token_fails(
@@ -90,9 +88,7 @@ class TestShareLink:
         )
         assert resp.status_code == 404
 
-    async def test_share_nonexistent_project(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_share_nonexistent_project(self, client: AsyncClient, auth_headers: dict) -> None:
         resp = await client.get(
             f"/api/v1/projects/{uuid.uuid4()}/share",
             params={"with": "invitee@example.com"},

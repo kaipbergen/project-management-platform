@@ -5,12 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.deps import get_current_user
 from app.db.session import get_db
-from app.models.models import User
+from app.models.models import Document, User
 from app.schemas.schemas import (
     DocumentDownloadResponse,
     DocumentMetadataPatch,
     DocumentOut,
-    MessageResponse,
 )
 from app.services.document_service import (
     delete_document,
@@ -33,7 +32,7 @@ async def list_documents_endpoint(
     project_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> list:
+) -> list[Document]:
     project, _ = await get_project_with_access(project_id, current_user, db)
     return project.documents
 
@@ -49,7 +48,7 @@ async def upload_documents_endpoint(
     files: list[UploadFile] = File(..., description="PDF or DOCX files"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> list:
+) -> list[Document]:
     return await upload_documents(project_id, files, current_user, db)
 
 

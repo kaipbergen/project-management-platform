@@ -14,8 +14,8 @@ from app.core.config import get_settings
 from app.core.limiter import limiter
 from app.core.logging import setup_logging
 from app.core.middleware import RequestLoggingMiddleware
-from app.db.session import engine, get_db
-from app.models.models import Base  # noqa: F401
+from app.db.session import Base, engine, get_db
+from app.models import models  # noqa: F401 — registers ORM models with Base.metadata
 
 settings = get_settings()
 setup_logging(level="DEBUG" if settings.app_env == "development" else "INFO")
@@ -41,7 +41,7 @@ def create_app() -> FastAPI:
 
     # ── Rate limiting ─────────────────────────────────────────────────────────
     app.state.limiter = limiter
-    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 
     # ── CORS ──────────────────────────────────────────────────────────────────
     app.add_middleware(

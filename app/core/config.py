@@ -15,8 +15,8 @@ class Settings(BaseSettings):
     app_env: str = "development"
     secret_key: str = "change-me-in-production-use-32-chars-minimum"
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 15    # short-lived
-    refresh_token_expire_days: int = 7       # long-lived
+    access_token_expire_minutes: int = 15  # short-lived
+    refresh_token_expire_days: int = 7  # long-lived
 
     # Database
     database_url: str = "postgresql+asyncpg://postgres:postgres@db:5432/project_mgmt"

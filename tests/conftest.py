@@ -78,6 +78,7 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 
 # ── Moto S3 ───────────────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def mock_s3():
     """Mocked AWS S3 via moto."""
@@ -90,6 +91,7 @@ def mock_s3():
 
 
 # ── Auth helpers ──────────────────────────────────────────────────────────────
+
 
 @pytest_asyncio.fixture
 async def registered_user(client: AsyncClient) -> dict:

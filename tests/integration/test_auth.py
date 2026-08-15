@@ -1,6 +1,5 @@
 """Integration tests for /api/v1/auth endpoints."""
 
-import pytest
 from httpx import AsyncClient
 
 
@@ -61,9 +60,7 @@ class TestRegister:
 
 
 class TestLogin:
-    async def test_login_success(
-        self, client: AsyncClient, registered_user: dict
-    ) -> None:
+    async def test_login_success(self, client: AsyncClient, registered_user: dict) -> None:
         resp = await client.post(
             "/api/v1/auth/login",
             json={
@@ -78,9 +75,7 @@ class TestLogin:
         assert data["access_expires_in"] == 60 * 60
         assert "refresh_token" in data
 
-    async def test_login_wrong_password(
-        self, client: AsyncClient, registered_user: dict
-    ) -> None:
+    async def test_login_wrong_password(self, client: AsyncClient, registered_user: dict) -> None:
         resp = await client.post(
             "/api/v1/auth/login",
             json={"login": registered_user["login"], "password": "wrongpass"},

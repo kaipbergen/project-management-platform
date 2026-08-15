@@ -28,12 +28,16 @@ def create_access_token(subject: str | int, extra: dict[str, Any] | None = None)
     }
     if extra:
         payload.update(extra)
-    return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
+    encoded: str = jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
+    return encoded
 
 
 def decode_access_token(token: str) -> dict[str, Any]:
     """Decode and validate JWT. Raises JWTError on failure."""
-    return jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+    decoded: dict[str, Any] = jwt.decode(
+        token, settings.secret_key, algorithms=[settings.algorithm]
+    )
+    return decoded
 
 
 __all__ = [

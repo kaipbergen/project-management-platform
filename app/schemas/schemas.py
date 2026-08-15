@@ -4,8 +4,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-
 # ── Auth ──────────────────────────────────────────────────────────────────────
+
 
 class UserRegister(BaseModel):
     login: str = Field(min_length=3, max_length=64, pattern=r"^[a-zA-Z0-9_.-]+$")
@@ -39,6 +39,7 @@ class UserOut(BaseModel):
 
 
 # ── Project ───────────────────────────────────────────────────────────────────
+
 
 class ProjectCreate(BaseModel):
     name: str = Field(min_length=1, max_length=128)
@@ -110,6 +111,7 @@ class DocumentDownloadResponse(BaseModel):
 
 # ── Member / Invite ───────────────────────────────────────────────────────────
 
+
 class MemberOut(BaseModel):
     user_id: uuid.UUID
     login: str
@@ -136,6 +138,7 @@ class JoinResponse(BaseModel):
 
 # ── Generic responses ─────────────────────────────────────────────────────────
 
+
 class MessageResponse(BaseModel):
     message: str
 
@@ -149,6 +152,7 @@ class StorageInfoResponse(BaseModel):
 
 
 # ── Pagination ────────────────────────────────────────────────────────────────
+
 
 class PaginationParams(BaseModel):
     page: int = Field(default=1, ge=1, description="Page number (1-based)")
@@ -173,6 +177,7 @@ class ProjectPage(BaseModel):
 
 # ── Document metadata patch ───────────────────────────────────────────────────
 
+
 class DocumentMetadataPatch(BaseModel):
     filename: str = Field(min_length=1, max_length=256)
 
@@ -180,6 +185,7 @@ class DocumentMetadataPatch(BaseModel):
     @classmethod
     def must_have_valid_extension(cls, v: str) -> str:
         import os
+
         _, ext = os.path.splitext(v.lower())
         if ext not in {".pdf", ".docx", ".doc"}:
             raise ValueError(f"Extension '{ext}' not allowed. Use .pdf or .docx")
@@ -187,6 +193,7 @@ class DocumentMetadataPatch(BaseModel):
 
 
 # ── Refresh token ─────────────────────────────────────────────────────────────
+
 
 class RefreshRequest(BaseModel):
     refresh_token: str = Field(min_length=1)
@@ -196,11 +203,12 @@ class TokenPair(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
-    access_expires_in: int   # seconds
+    access_expires_in: int  # seconds
     refresh_expires_in: int  # seconds
 
 
 # ── Search ────────────────────────────────────────────────────────────────────
+
 
 class ProjectSearchParams(BaseModel):
     search: str | None = Field(default=None, max_length=128)

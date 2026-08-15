@@ -2,13 +2,13 @@ import os
 import uuid
 
 from fastapi import UploadFile
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.config import get_settings
 from app.core.exceptions import BadRequestError, ForbiddenError, NotFoundError, StorageLimitError
-from app.models.models import Document, Project, ProjectMember, User
+from app.models.models import Document, User
 from app.schemas.schemas import ALLOWED_EXTENSIONS
 from app.services.project_service import get_project_with_access
 from app.services.s3_service import (
@@ -85,9 +85,7 @@ async def get_document_download_url(
     db: AsyncSession,
 ) -> tuple[Document, str]:
     result = await db.execute(
-        select(Document)
-        .options(selectinload(Document.project))
-        .where(Document.id == document_id)
+        select(Document).options(selectinload(Document.project)).where(Document.id == document_id)
     )
     doc = result.scalar_one_or_none()
     if not doc:
@@ -107,9 +105,7 @@ async def update_document(
     db: AsyncSession,
 ) -> Document:
     result = await db.execute(
-        select(Document)
-        .options(selectinload(Document.project))
-        .where(Document.id == document_id)
+        select(Document).options(selectinload(Document.project)).where(Document.id == document_id)
     )
     doc = result.scalar_one_or_none()
     if not doc:
@@ -152,9 +148,7 @@ async def delete_document(
     db: AsyncSession,
 ) -> None:
     result = await db.execute(
-        select(Document)
-        .options(selectinload(Document.project))
-        .where(Document.id == document_id)
+        select(Document).options(selectinload(Document.project)).where(Document.id == document_id)
     )
     doc = result.scalar_one_or_none()
     if not doc:
@@ -183,9 +177,7 @@ async def patch_document_metadata(
 ) -> Document:
     """Rename a document (metadata only, no S3 key change)."""
     result = await db.execute(
-        select(Document)
-        .options(selectinload(Document.project))
-        .where(Document.id == document_id)
+        select(Document).options(selectinload(Document.project)).where(Document.id == document_id)
     )
     doc = result.scalar_one_or_none()
     if not doc:
@@ -206,4 +198,5 @@ async def get_project_access(
 ) -> None:
     """Lightweight access check without loading full project relationships."""
     from app.services.project_service import get_project_with_access
+
     await get_project_with_access(project_id, user, db)

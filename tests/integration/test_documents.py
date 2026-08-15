@@ -2,9 +2,8 @@
 
 import io
 import uuid
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
 from httpx import AsyncClient
 
 
@@ -14,9 +13,7 @@ def _make_pdf_bytes(name: str = "test") -> bytes:
 
 
 class TestUploadDocuments:
-    async def test_upload_single_document(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_upload_single_document(self, client: AsyncClient, auth_headers: dict) -> None:
         # Create project
         proj = await client.post(
             "/api/v1/projects",
@@ -40,9 +37,7 @@ class TestUploadDocuments:
         assert data[0]["content_type"] == "application/pdf"
         assert data[0]["size_bytes"] > 0
 
-    async def test_upload_invalid_extension(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_upload_invalid_extension(self, client: AsyncClient, auth_headers: dict) -> None:
         proj = await client.post(
             "/api/v1/projects",
             json={"name": "Bad Upload Project"},
@@ -57,9 +52,7 @@ class TestUploadDocuments:
         )
         assert resp.status_code == 400
 
-    async def test_upload_multiple_documents(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_upload_multiple_documents(self, client: AsyncClient, auth_headers: dict) -> None:
         proj = await client.post(
             "/api/v1/projects",
             json={"name": "Multi Doc Project"},
@@ -103,9 +96,7 @@ class TestUploadDocuments:
             "/api/v1/auth/login",
             json={"login": "intruder_upload", "password": "Password123!"},
         )
-        intruder_headers = {
-            "Authorization": f"Bearer {login_resp.json()['access_token']}"
-        }
+        intruder_headers = {"Authorization": f"Bearer {login_resp.json()['access_token']}"}
 
         proj = await client.post(
             "/api/v1/projects",
@@ -138,9 +129,7 @@ class TestListDocuments:
         assert resp.status_code == 200
         assert resp.json() == []
 
-    async def test_list_after_upload(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_list_after_upload(self, client: AsyncClient, auth_headers: dict) -> None:
         proj = await client.post(
             "/api/v1/projects",
             json={"name": "Listed Docs"},
@@ -208,9 +197,7 @@ class TestDownloadDocument:
 
 
 class TestDeleteDocument:
-    async def test_owner_can_delete_document(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_owner_can_delete_document(self, client: AsyncClient, auth_headers: dict) -> None:
         proj = await client.post(
             "/api/v1/projects",
             json={"name": "Delete Doc Project"},
@@ -277,9 +264,7 @@ class TestDeleteDocument:
             "/api/v1/auth/login",
             json={"login": "doc_participant", "password": "Password123!"},
         )
-        part_headers = {
-            "Authorization": f"Bearer {login_resp.json()['access_token']}"
-        }
+        part_headers = {"Authorization": f"Bearer {login_resp.json()['access_token']}"}
 
         resp = await client.delete(
             f"/api/v1/documents/{doc_id}",

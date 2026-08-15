@@ -1,19 +1,15 @@
 """Tests for pagination, members endpoint, metadata patch, notifications."""
 
 import io
-import math
 from unittest.mock import patch
 
-import pytest
 from httpx import AsyncClient
-
 
 # ── Pagination ────────────────────────────────────────────────────────────────
 
+
 class TestPagination:
-    async def test_default_page_returns_meta(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_default_page_returns_meta(self, client: AsyncClient, auth_headers: dict) -> None:
         resp = await client.get("/api/v1/projects", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
@@ -25,9 +21,7 @@ class TestPagination:
         assert "total" in meta
         assert "pages" in meta
 
-    async def test_pagination_size_and_page(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_pagination_size_and_page(self, client: AsyncClient, auth_headers: dict) -> None:
         # Create 3 projects
         for i in range(3):
             await client.post(
@@ -37,9 +31,7 @@ class TestPagination:
             )
 
         # Page 1, size 2
-        resp = await client.get(
-            "/api/v1/projects?page=1&size=2", headers=auth_headers
-        )
+        resp = await client.get("/api/v1/projects?page=1&size=2", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert len(data["items"]) == 2
@@ -50,35 +42,24 @@ class TestPagination:
     async def test_page_beyond_last_returns_empty(
         self, client: AsyncClient, auth_headers: dict
     ) -> None:
-        resp = await client.get(
-            "/api/v1/projects?page=999&size=20", headers=auth_headers
-        )
+        resp = await client.get("/api/v1/projects?page=999&size=20", headers=auth_headers)
         assert resp.status_code == 200
         assert resp.json()["items"] == []
 
-    async def test_invalid_page_rejected(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
-        resp = await client.get(
-            "/api/v1/projects?page=0", headers=auth_headers
-        )
+    async def test_invalid_page_rejected(self, client: AsyncClient, auth_headers: dict) -> None:
+        resp = await client.get("/api/v1/projects?page=0", headers=auth_headers)
         assert resp.status_code == 422
 
-    async def test_size_over_100_rejected(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
-        resp = await client.get(
-            "/api/v1/projects?size=101", headers=auth_headers
-        )
+    async def test_size_over_100_rejected(self, client: AsyncClient, auth_headers: dict) -> None:
+        resp = await client.get("/api/v1/projects?size=101", headers=auth_headers)
         assert resp.status_code == 422
 
 
 # ── Members endpoint ──────────────────────────────────────────────────────────
 
+
 class TestMembersEndpoint:
-    async def test_owner_sees_themselves(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_owner_sees_themselves(self, client: AsyncClient, auth_headers: dict) -> None:
         proj = await client.post(
             "/api/v1/projects",
             json={"name": "Members Test"},
@@ -144,9 +125,7 @@ class TestMembersEndpoint:
             "/api/v1/auth/login",
             json={"login": "outsider_members", "password": "Password123!"},
         )
-        outsider_headers = {
-            "Authorization": f"Bearer {login_resp.json()['access_token']}"
-        }
+        outsider_headers = {"Authorization": f"Bearer {login_resp.json()['access_token']}"}
 
         proj = await client.post(
             "/api/v1/projects",
@@ -164,13 +143,12 @@ class TestMembersEndpoint:
 
 # ── Document metadata PATCH ───────────────────────────────────────────────────
 
+
 class TestDocumentMetadataPatch:
     def _pdf_bytes(self) -> bytes:
         return b"%PDF-1.4 minimal"
 
-    async def test_rename_document(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_rename_document(self, client: AsyncClient, auth_headers: dict) -> None:
         proj = await client.post(
             "/api/v1/projects",
             json={"name": "Rename Doc Project"},
@@ -223,6 +201,7 @@ class TestDocumentMetadataPatch:
         self, client: AsyncClient, auth_headers: dict
     ) -> None:
         import uuid
+
         resp = await client.patch(
             f"/api/v1/documents/{uuid.uuid4()}/metadata",
             json={"filename": "new.pdf"},
@@ -232,6 +211,7 @@ class TestDocumentMetadataPatch:
 
 
 # ── Background notification (fire-and-forget) ─────────────────────────────────
+
 
 class TestNotifications:
     async def test_invite_triggers_notification(
@@ -252,9 +232,7 @@ class TestNotifications:
         )
         project_id = proj.json()["id"]
 
-        with patch(
-            "app.api.v1.endpoints.projects.notify_user_invited"
-        ) as mock_notify:
+        with patch("app.api.v1.endpoints.projects.notify_user_invited"):
             resp = await client.post(
                 f"/api/v1/projects/{project_id}/invite",
                 json={"user_login": "notify_invitee"},

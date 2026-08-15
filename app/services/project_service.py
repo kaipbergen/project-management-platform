@@ -1,5 +1,5 @@
-import math
 import uuid
+from typing import Any
 
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 
 from app.core.exceptions import ConflictError, ForbiddenError, NotFoundError
 from app.models.models import Project, ProjectMember, User
-from app.schemas.schemas import PaginationParams, ProjectCreate, ProjectSearchParams, ProjectUpdate
+from app.schemas.schemas import ProjectCreate, ProjectSearchParams, ProjectUpdate
 
 
 async def get_project_with_access(
@@ -91,14 +91,11 @@ async def list_user_projects(
             )
         )
 
-    count_result = await db.execute(
-        select(func.count()).select_from(base_query.subquery())
-    )
+    count_result = await db.execute(select(func.count()).select_from(base_query.subquery()))
     total = count_result.scalar_one()
 
     result = await db.execute(
-        base_query
-        .options(selectinload(Project.documents))
+        base_query.options(selectinload(Project.documents))
         .order_by(Project.created_at.desc())
         .offset(params.offset)
         .limit(params.size)
@@ -182,7 +179,7 @@ async def list_project_members(
     project_id: uuid.UUID,
     user: User,
     db: AsyncSession,
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     await get_project_with_access(project_id, user, db)
 
     result = await db.execute(
@@ -192,6 +189,5 @@ async def list_project_members(
         .order_by(ProjectMember.joined_at)
     )
     return [
-        {"login": row.login, "role": row.role, "joined_at": row.joined_at}
-        for row in result.all()
+        {"login": row.login, "role": row.role, "joined_at": row.joined_at} for row in result.all()
     ]

@@ -1,4 +1,5 @@
 from collections.abc import AsyncGenerator
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
@@ -7,8 +8,9 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
-def _build_engine_kwargs() -> dict:
-    kwargs: dict = {"echo": settings.app_env == "development"}
+
+def _build_engine_kwargs() -> dict[str, Any]:
+    kwargs: dict[str, Any] = {"echo": settings.app_env == "development"}
     # pool_size / max_overflow only supported by PostgreSQL driver, not SQLite
     if "postgresql" in settings.database_url:
         kwargs["pool_pre_ping"] = True
